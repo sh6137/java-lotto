@@ -1,52 +1,52 @@
 package lotto.domain;
 
+import lotto.factory.LottoFactory;
 import lotto.generator.TestLottoNumberGenerator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LottosTest {
 
+    private List<Lotto> manualLottos;
+
+    @BeforeEach
+    void setUp() {
+        this.manualLottos = Collections.emptyList();
+    }
+
     @DisplayName("구매금액에 따른 로또 구매개수 확인")
     @ParameterizedTest
-    @CsvSource(value = {"0,0", "1000,1", "5000,5"})
+    @CsvSource(value = {"1000,1", "5000,5"})
     void of(int amount, int expectedPurchaseCount) {
         // given
-        Money money = Money.from(amount);
+        List<Lotto> autoLottos = LottoFactory.buyAutoLottos(new TestLottoNumberGenerator(), Money.from(amount));
 
         // when
-        Lottos lottos = Lottos.of(new TestLottoNumberGenerator(), money);
+        Lottos lottos = Lottos.of(manualLottos, autoLottos);
 
         // then
         assertThat(lottos.getLottoCount()).isEqualTo(expectedPurchaseCount);
     }
 
-    @DisplayName("당첨번호와 보너스 번호, 당첨등수를 입력하면 몇개가 당첨되었는지 반환한다")
+    @DisplayName("1등 번호를 금액만큼 구입하면 구입장수만큼 count를 반환한다")
     @ParameterizedTest
-    @CsvSource(value = {"1,2,3,43,44,45:42:3:false:1", "1,2,3,4,44,45:43:4:false:1", "1,2,3,4,5,45:44:5:false:1",
-            "1,2,3,4,5,45:6:5:true:1", "1,2,3,4,5,6:45:6:false:1"}, delimiter = ':')
-    void getRankCount(String purchaseNumber, int bonusNum, int matchCount, boolean matchBonus, int expectedRankCount) {
+    @CsvSource(value = {"1000,1", "5000,5"})
+    void getRankCount(int amount, int expectedRankCount) {
         // given
-        Lottos lottos = Lottos.of(new TestLottoNumberGenerator(), Money.from(1000));
-        Rank rank = Rank.valueOf(matchCount, matchBonus);
-        Number bonusNumber = Number.from(bonusNum);
-
-        Set<Integer> numbers = new HashSet<>(Arrays.asList(purchaseNumber.split(",")))
-                .stream()
-                .map(i -> Integer.valueOf(i))
-                .collect(Collectors.toSet());
-
-        Lotto prizeLotto = Lotto.from(numbers);
+        List<Lotto> autoLottos = LottoFactory.buyAutoLottos(new TestLottoNumberGenerator(), Money.from(amount));
+        Lottos lottos = Lottos.of(manualLottos, autoLottos);
 
         // when
-        int rankCount = lottos.getRankCount(prizeLotto, bonusNumber, rank);
+        WinningLotto winningLotto = WinningLotto.of(Lotto.from(new TestLottoNumberGenerator()), Number.from(7));
+        Rank rank = Rank.valueOf(6, false);
+        int rankCount = lottos.getRankCount(winningLotto, rank);
 
         // then
         assertThat(rankCount).isEqualTo(expectedRankCount);
