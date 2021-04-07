@@ -6,23 +6,32 @@ import java.util.stream.IntStream;
 
 public class LottoTicket {
 
-    private static final String NUMBER_DELIMITER = ",";
+    private static final int MIN_LOTTO_COUNT = 1;
 
     private final List<Lotto> lottoList;
+    private final LottoTicketType lottoTicketType;
 
     public LottoTicket(int count) {
         validate(count);
         this.lottoList = generateLottoList(count);
+        this.lottoTicketType = LottoTicketType.AUTO;
     }
 
     public LottoTicket(List<String> lottoNumberList) {
         validate(lottoNumberList);
         this.lottoList = generateLottoList(lottoNumberList);
+        this.lottoTicketType = LottoTicketType.COMPLEX;
+    }
+
+    public LottoTicket(List<String> lottoNumberList, LottoTicketType lottoTicketType) {
+        validate(lottoNumberList);
+        this.lottoList = generateLottoList(lottoNumberList);
+        this.lottoTicketType = lottoTicketType;
     }
 
     private void validate(int count) {
-        if (count < 1) {
-            throw new IllegalArgumentException("최소 1개 이상의 구매수량을 입력해 주세요");
+        if (count < MIN_LOTTO_COUNT) {
+            throw new IllegalArgumentException("최소 " + MIN_LOTTO_COUNT + "개 이상의 구매수량을 입력해 주세요");
         }
     }
 
@@ -55,11 +64,15 @@ public class LottoTicket {
     }
 
     private int[] generateLottoNumbers(String lottoNumbers) {
-        return Arrays.stream(lottoNumbers.split(NUMBER_DELIMITER)).mapToInt(value -> Integer.parseInt(value.trim())).toArray();
+        return Arrays.stream(lottoNumbers.split(LottoConstant.NUMBER_DELIMITER)).mapToInt(value -> Integer.parseInt(value.trim())).toArray();
     }
 
     public List<Lotto> getLottoList() {
         return this.lottoList;
+    }
+
+    public LottoTicketType getLottoTicketType() {
+        return lottoTicketType;
     }
 
     public int getCount() {
@@ -68,7 +81,8 @@ public class LottoTicket {
 
     public LottoRanks inquiryRankList(int[] winNumbers, int bonusNumber) {
         Lotto.validateLottoNumbers(winNumbers);
-        return new LottoRanks(this.lottoList.stream().map(lotto -> lotto.inquiryRank(winNumbers, bonusNumber)).collect(Collectors.toList()));
+        List<LottoRank> lottoRankList = this.lottoList.stream().map(lotto -> lotto.inquiryRank(winNumbers, bonusNumber)).collect(Collectors.toList());
+        return new LottoRanks(lottoRankList);
     }
 
 }

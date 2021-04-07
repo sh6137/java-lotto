@@ -19,7 +19,7 @@ public class Lotto {
 
     public LottoRank inquiryRank(int[] winNumbers, int bonusNumber) {
         validateBonusNumber(winNumbers, bonusNumber);
-        return LottoRank.inquiryRank(matchCount(winNumbers), matchBonus(bonusNumber));
+        return LottoRank.inquiryRank(matchSum(winNumbers), matchBonus(bonusNumber));
     }
 
     private void validateBonusNumber(int[] winNumbers, int bonusNumber) {
@@ -33,12 +33,14 @@ public class Lotto {
         }
     }
 
-    private int matchCount(int[] winNumbers) {
-        int matchCount = 0;
-        for (LottoNumber lottoNumber : lottoNumberList) {
-            matchCount += Arrays.stream(winNumbers).filter(lottoNumber::match).count();
-        }
-        return matchCount;
+    private int matchSum(int[] winNumbers) {
+        return lottoNumberList.stream()
+                .mapToInt(lottoNumber -> matchCount(lottoNumber, winNumbers))
+                .sum();
+    }
+
+    private int matchCount(LottoNumber lottoNumber, int[] winNumbers) {
+        return (int) Arrays.stream(winNumbers).filter(lottoNumber::match).count();
     }
 
     private boolean matchBonus(int bonusNumber) {
@@ -50,7 +52,7 @@ public class Lotto {
             throw new IllegalArgumentException("당첨 숫자를 입력해 주세요.");
         }
         if (winNumbers.length != LottoConstant.MAX_LOTTO_COUNT) {
-            throw new IllegalArgumentException("당첨 숫자는 6개의 수 여야 합니다.");
+            throw new IllegalArgumentException("당첨 숫자는 " + LottoConstant.MAX_LOTTO_COUNT + "개의 수 여야 합니다.");
         }
         if (Arrays.stream(winNumbers).distinct().count() < LottoConstant.MAX_LOTTO_COUNT) {
             throw new IllegalArgumentException("중복된 숫자가 존재합니다. 입력값을 확인해주세요.");
