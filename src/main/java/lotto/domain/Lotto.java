@@ -14,28 +14,32 @@ public class Lotto {
 
     public void lotto(){
 
-        int buyCount = inputView.count();
+        int buyCount = lottoMachine.buyCount(inputView.count());
+        int manualBuyCount = inputView.manualBuyCount();
+        int autoBuyCount = buyCount - manualBuyCount;
 
-        resultView.print(buyCount);
+        lottoMachine.buyCountValid(buyCount, manualBuyCount);
 
-        List<LottoNumbers> lottoNumbers = lottoMachine.lottoNumbers(buyCount);
+        List<String> manualLotto = inputView.manualBuy(manualBuyCount);
 
+        List<LottoNumbers> lottoNumbers = lottoMachine.getLottoNumbers(manualLotto, autoBuyCount);
+
+        resultView.print(manualBuyCount, autoBuyCount);
         resultView.print(lottoNumbers);
 
         String numbers = inputView.numbers();
-        int bonusBall = inputView.bonusBall();
+        int bonusNumber = inputView.bonusBall();
 
-        while (!lottoMachine.useAbleBonusBall(numbers, bonusBall)) {
+        while (!lottoMachine.useAbleBonusBall(numbers, bonusNumber)) {
             System.out.println("보너스 볼은 당첨 번호와 달라야 합니다.");
-            bonusBall = inputView.bonusBall();
+            bonusNumber = inputView.bonusBall();
         }
 
+        LottoNumber bonusBall = LottoNumber.lottoNumber(bonusNumber);
         WinningNumbers winningNumbers = new WinningNumbers(numbers, bonusBall);
 
-        String resultInfo = lottoResult.result(lottoNumbers, winningNumbers);
-
         resultView.print();
-        resultView.print(resultInfo);
+        resultView.print(lottoResult.result(lottoNumbers, winningNumbers));
 
     }
 
