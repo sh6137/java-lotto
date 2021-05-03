@@ -25,6 +25,7 @@ public class StringCalculatorTest {
         assertThat(input.split(classifier[0])).isEqualTo(expected);
     }
 
+    @DisplayName("지정구분자 인풋값 테스트")
     @Test
     void specialClassifierTest() {
         StringCalculator ca =  new StringCalculator();
@@ -33,7 +34,4 @@ public class StringCalculatorTest {
         String[] result= ca.specialClassifier(input);
         assertThat(result).isEqualTo(expected);
     }
-
-    
-
 }
