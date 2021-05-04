@@ -65,9 +65,11 @@ public class StringCalculator {
         String value2 = "\\n";
         String seperator = ";";
         String[] result = new String[0];
+
         if (compare.contains(value1) | compare.contains(value2)) {
             result = compare.split(seperator);
         }
         return result;
     }
+
  */
